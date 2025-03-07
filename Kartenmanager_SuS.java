@@ -198,54 +198,40 @@ public class Kartenmanager_SuS extends Ereignisanwendung {
     // Ereignismethoden
     // ----------------------------------------------------------
 
-    public void Sort_Klick() {
+public void Sort_Klick() {
         loescheAnzeige();
-        //Startzeit messen
-        startZeit = System.currentTimeMillis();
-
-        // z.B. 100 Durchläufe
-        for(int i=0; i<100; i++){
-            Sortieren();
+        startZeit = System.nanoTime();
+    
+        // z.B. 1000 Durchläufe
+        for(int I=0; I<1000; I++){
+            boolean sortiert = true;
+            karten = new Liste<Karte>(); 
+            initialisiereKarten(0);
+            do
+            {
+                sortiert = true;
+                for(int i = 1; i < karten.laenge(); i++)
+                {
+                    karten.geheZuPosition(i);
+                    Karte Karte_a = karten.aktuellesElement();           
+                    karten.geheZuPosition(i+1);
+                    Karte Karte_b = karten.aktuellesElement();
+                    if(Karte_a.wert > Karte_b.wert||Karte_a.wert == Karte_b.wert && Karte_a.farbe < Karte_b.farbe)
+                    {
+                        karten.ersetzeAktuelles(Karte_a);
+                        karten.geheZuPosition(i);
+                        karten.ersetzeAktuelles(Karte_b);
+                        sortiert = false;
+                    }
+                }
+            }while(!sortiert);
         }
-
-        //Endzeit messen
-        endZeit = System.currentTimeMillis();
-
-        double dauer = endZeit - startZeit;
-
-        loescheAnzeige();
+        endZeit=System.nanoTime();
+        double d = endZeit - startZeit;
+        d = d/1000000;
         zeichneKarten(0, 50, 150);
-
-        infoEtikett.setzeInhalt("Karten sotiert in "+ dauer+" ms");
+        infoEtikett.setzeInhalt("Erfolgreich Sortiert. Zeit: "+ d + " ms");
     }
-
-    public void Sortieren(){    
-        //boolean eingefügt;
-        int n = kartenAnzahl;
-        //do {
-        karten.zumAnfang();
-        loescheAnzeige();
-        for (int i = 1; i <= karten.laenge(); i++) {
-            karten.geheZuPosition(i); Karte a = karten.aktuellesElement();
-            karten.loescheAktuelles();
-            boolean eingefügt = false;
-            int j = i-1;
-
-            while(j >= 1 && !eingefügt) {
-                karten.geheZuPosition(j);
-                Karte b = karten.aktuellesElement();
-                if(a.wert < b.wert || (a.wert == b.wert && a.farbe < b.farbe)) {
-                    j--;
-                } else {
-                    eingefügt = true; } }
-            karten.geheZuPosition(j+1);
-            karten.fuegeDavorEin(a);}
-        // }
-    }
-
-    // n--; // Reduziere die Anzahl der zu vergleichenden Elemente
-    // } while (vertauscht);
-    // }
 
     public void Update_Klick() {
         String s = tfUmfang.inhaltAlsText().trim();
