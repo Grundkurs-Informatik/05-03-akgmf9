@@ -200,47 +200,58 @@ public class Kartenmanager_SuS extends Ereignisanwendung {
 
     public void Sort_Klick() {
         loescheAnzeige();
-        startZeit = System.nanoTime();
+        //Startzeit messen
+        startZeit = System.currentTimeMillis();
 
-        // z.B. 1000 Durchläufe
-        for(int I=0; I<1000; I++){
-            boolean sortiert = true;
-            karten = new Liste<Karte>(); 
-            initialisiereKarten(0);
-            do
-            {
-                sortiert = true;
-                for(int i = 1; i < karten.laenge(); i++)
-                {
-                    karten.geheZuPosition(i);
-                    Karte Karte_a = karten.aktuellesElement();           
-                    karten.geheZuPosition(i+1);
-                    Karte Karte_b = karten.aktuellesElement();
-                    if(Karte_a.wert > Karte_b.wert||Karte_a.wert == Karte_b.wert && Karte_a.farbe < Karte_b.farbe)
-                    {
-                        karten.ersetzeAktuelles(Karte_a);
-                        karten.geheZuPosition(i);
-                        karten.ersetzeAktuelles(Karte_b);
-                        sortiert = false;
-                    }
-                }
-
-            }while(!sortiert);
-
+        // z.B. 100 Durchläufe
+        for(int i=0; i<100; i++){
+            Sortieren();
         }
 
-        endZeit=System.nanoTime();
-        double d = endZeit - startZeit;
-        d = d/1000000;
+        //Endzeit messen
+        endZeit = System.currentTimeMillis();
 
+        double dauer = endZeit - startZeit;
+
+        loescheAnzeige();
         zeichneKarten(0, 50, 150);
-        infoEtikett.setzeInhalt("Erfolgreich Sortiert. Zeit: "+ d + " ms");
+
+        infoEtikett.setzeInhalt("Karten sotiert in "+ dauer+" ms");
     }
 
+    public void Sortieren(){    
+        //boolean eingefügt;
+        int n = kartenAnzahl;
+        //do {
+        karten.zumAnfang();
+        loescheAnzeige();
+        for (int i = 1; i <= karten.laenge(); i++) {
+            karten.geheZuPosition(i); Karte a = karten.aktuellesElement();
+            karten.loescheAktuelles();
+            boolean eingefügt = false;
+            int j = i-1;
+
+            while(j >= 1 && !eingefügt) {
+                karten.geheZuPosition(j);
+                Karte b = karten.aktuellesElement();
+                if(a.wert < b.wert || (a.wert == b.wert && a.farbe < b.farbe)) {
+                    j--;
+                } else {
+                    eingefügt = true; } }
+            karten.geheZuPosition(j+1);
+            karten.fuegeDavorEin(a);}
+        // }
+    }
+
+    // n--; // Reduziere die Anzahl der zu vergleichenden Elemente
+    // } while (vertauscht);
+    // }
 
     public void Update_Klick() {
         String s = tfUmfang.inhaltAlsText().trim();
         int neuAnz;
+        //Startzeit messen
+        startZeit = System.currentTimeMillis();
         try {
             neuAnz = Integer.parseInt(s);
             if(neuAnz<=0) neuAnz=52;
@@ -256,58 +267,38 @@ public class Kartenmanager_SuS extends Ereignisanwendung {
         initialisiereKarten(0);
         zeichneKarten(0, 50, 150);
 
-        infoEtikett.setzeInhalt("Neuer Stapel: "+kartenAnzahl+" Karten (Liste).");
+        //Endzeit messen
+        endZeit = System.currentTimeMillis();
+        double dauer = endZeit - startZeit;
+
+        infoEtikett.setzeInhalt("Karten erneurt in "+ dauer+" ms");
+
+        //infoEtikett.setzeInhalt("Neuer Stapel: "+kartenAnzahl+" Karten (Liste).");
     }
 
     public void Einfuegen_Klick() {
-        try
-        {
-            int pos = Integer.parseInt(tfPos.inhaltAlsText());
-            int w = auswahlWert.index();
-            int f = auswahlFarbe.index()-1;
-            loescheAnzeige();
+        int wert = auswahlWert.index();
+        int farbe = auswahlFarbe.index()-1;
+        int pos = Integer.parseInt(tfPos.inhaltAlsText().trim());
 
-            karten.geheZuPosition(pos);
+        loescheAnzeige();
 
-            if(pos >= karten.laenge())
-            {
-                karten.fuegeDahinterEin(new Karte(w,f));
-                tfPos.setzeInhalt(karten.laenge());
-            }else if(pos < 0)
-            {
-                tfPos.setzeInhalt(0);
-                karten.fuegeDavorEin(new Karte(w,f));
-            }else
-            {
-                karten.fuegeDavorEin(new Karte(w,f));
-            }
+        karten.geheZuPosition(pos + 1);
+        karten.fuegeDahinterEin(new Karte(wert, farbe));
 
-            zeichneKarten(0, 50, 150);
-
-        }catch(NumberFormatException e)
-        {
-            infoEtikett.setzeInhalt("Ungültige Position");
-        }
+        zeichneKarten(0,50,150);
     }
 
     public void Entfernen_Klick() {
-        try
-        {
-            int pos = Integer.parseInt(tfPos.inhaltAlsText());
-            loescheAnzeige();
-            if(pos <= 0)
-            {
-                pos = 1;
-                tfPos.setzeInhalt(1);
-            }
-            if(pos >= karten.laenge())tfPos.setzeInhalt(karten.laenge()-1);
-            karten.geheZuPosition(pos);
-            karten.entferneAktuelles();
-            zeichneKarten(0, 50, 150);
-        }catch(NumberFormatException e)
-        {
-            infoEtikett.setzeInhalt("Ungültige Position");
-        }
-    }
+        int wert = auswahlWert.index();
+        int farbe = auswahlFarbe.index()-1;
+        int pos = Integer.parseInt(tfPos.inhaltAlsText().trim());
 
+        loescheAnzeige();
+
+        karten.geheZuPosition(pos +- 1);
+        karten.loescheAktuelles();
+
+        zeichneKarten(0,50,150);
+    }
 }
